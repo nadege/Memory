@@ -12,4 +12,15 @@ public class Particule : MonoBehaviour
         //particleSystem.renderer.sortingLayerName = "foreground";
         particleSystem.renderer.sortingOrder = 2;
     }
+
+    void Update()
+    {
+        if(particleSystem)
+        {
+            if(!particleSystem.IsAlive())
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
 }

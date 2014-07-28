@@ -1,9 +1,26 @@
+using System;
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 public class Game : MonoBehaviour
 {
+    public enum GameState
+    {
+        Menu,
+        Game,
+        Win
+    }
+
+    public enum GameMode
+    {
+        Hard,
+        Medium,
+        Easy
+    }
+
     [SerializeField]
     private float m_BoardWidth = 20f;
     [SerializeField]
@@ -14,62 +31,124 @@ public class Game : MonoBehaviour
     private float m_CardOffset = 3;
     [SerializeField]
     private float m_CardWidth = 0;
-    [SerializeField]
-    private int m_Width = 6;
-    [SerializeField]
-    private int m_Height = 4;
+    
+    private int m_Width;
+    private int m_Height;
+
+    public Vector3 StartPositionHard;
+    public Vector3 StartPositionMedium;
+    public Vector3 StartPositionEasy;
+
+    private int m_WidthHard = 5;
+    private int m_HeightHard = 4;
+    private int m_WidthMedium = 3;
+    private int m_HeightMedium = 4;
+    private int m_WidthEasy = 3;
+    private int m_HeightEasy = 2;
+
 
     public GameObject CardPrefab;
     public GameObject StarParticulePrefab;
     public List<Sprite> Sprites;
+    public Sprite BackSprite;
+
+    public int PairCount;
 
     public readonly List<Card> ShowingCards = new List<Card>();
+    private List<GameObject> Cards;
 
-    private float m_Delay;
+    public GameState State { get; private set; }
+    public GameMode Difficulty;
 
-    private int m_FailCount;
-    public GUIText FailCount;
+    private float delay;
+    private int failCount;
+    private int remainingCards;
 
-    void Start () 
+   // public GUIText FailCount;
+    
+    
+    void Start()
     {
+        delay = 0.0f;
+        failCount = 0;
+        remainingCards = 0;
+        ShowingCards.Clear();
+        State = GameState.Menu;
+     //   FailCount.enabled = false;
+
+        Object.DontDestroyOnLoad(this.gameObject);
+    }
+
+    void StartGame () 
+    {
+        switch (Difficulty)
+        {
+            case GameMode.Hard:
+                this.m_Width = m_WidthHard;
+                this.m_Height = m_HeightHard;
+                break;
+            case GameMode.Medium:
+                this.m_Width = m_WidthMedium;
+                this.m_Height = m_HeightMedium;
+                break;
+            case GameMode.Easy:
+                this.m_Width = m_WidthEasy;
+                this.m_Height = m_HeightEasy;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+
+        // Scale
+        float scaleValue = 0.8f;
+
         List<int> spriteIndex = new List<int>();
-        for (int i = 0; i < Sprites.Count; i++)
+        for (int i = 0; i < this.Sprites.Count; i++)
 	    {
 	        spriteIndex.Add(i);
 	    }
 
-        var cards = this.GenerateCards(spriteIndex);
+        this.remainingCards = PairCount * 2;
 
-        float widthSpaceNeeded = (m_Width - 1) * (m_CardOffset + m_CardWidth);
-        float heigthSpaceNeeded = (m_Height - 1) * (m_CardOffset + m_CardWidth);
+        Cards = this.GenerateCards(spriteIndex);
+        var cards = new List<GameObject>(Cards);
+
+        float widthSpaceNeeded = (m_Width - 1) * (m_CardOffset + m_CardWidth) * scaleValue;
+        float heigthSpaceNeeded = (m_Height - 1) * (m_CardOffset + m_CardWidth) * scaleValue;
 
         Vector3 startingPosition = new Vector3((m_BoardWidth - widthSpaceNeeded) / 2, (m_BoardHeight - heigthSpaceNeeded) / 2);
 
-        /*if (startingPosition.x <= 0 || startingPosition.y <= 0)
+        Vector3 scale = new Vector3(scaleValue, scaleValue);
+        foreach (var card in Cards)
         {
-           Scale down
-        }*/
+            card.transform.localScale = scale;
+        }
 
+        int cardToPlace = Cards.Count;
         Debug.Log("Starting position " + startingPosition);
-        for (int i = 0; i < this.m_Width; i++)
+        for (int i = 0; i < this.m_Height && cardToPlace > 0; i++)
 	    {
-            for (int j = 0; j < this.m_Height; j++)
+            for (int j = 0; j < this.m_Width && cardToPlace > 0; j++)
             {
-                Vector3 position = startingPosition +
-                                   new Vector3((m_CardOffset + m_CardWidth)*i, (m_CardOffset + m_CardWidth)*j);
+                Vector3 position = startingPosition + new Vector3((m_CardOffset + m_CardWidth) * scaleValue * j, (m_CardOffset + m_CardWidth) * scaleValue * i);
 
                 int index = Random.Range(0, cards.Count - 1);
                 GameObject card = cards[index];
                 card.transform.position = position;
                 cards.Remove(card);
+                cardToPlace--;
             }    
 	    }
+
+        State = GameState.Game;
+     //   FailCount.enabled = true;
 	}
 
     private List<GameObject> GenerateCards(List<int> spriteIndex)
     {
         List<GameObject> cards = new List<GameObject>();
-        for (int i = 0; i < (this.m_Width*this.m_Height)/2; i++)
+        for (int i = 0;  i < this.PairCount; i++)
         {
             int index = Random.Range(0, spriteIndex.Count - 1);
             Sprite texture = this.Sprites[spriteIndex[index]];
@@ -92,26 +171,45 @@ public class Game : MonoBehaviour
 
     void Update () 
     {
+        if (Application.loadedLevelName == "Game" && State == GameState.Menu)
+        {
+            StartGame();
+        }
+
 		if (ShowingCards.Count == 2)
 		{
-            if (m_Delay > 0.0f)
+            if (this.delay > 0.0f)
             {
-                m_Delay -= Time.deltaTime;
+                this.delay -= Time.deltaTime;
             }
 
-            if (m_Delay <= 0.0f)
+            if (this.delay <= 0.0f)
 		    {
                 if (ShowingCards[0].Picture.sprite != ShowingCards[1].Picture.sprite)
 		        {
 		            ShowingCards[0].Show(false);
 		            ShowingCards[1].Show(false);
 		            ShowingCards.Clear();
-		            m_FailCount++;
-		            FailCount.text = m_FailCount.ToString();
+		            this.failCount++;
+		//            FailCount.text = this.failCount.ToString();
 		        }
 		    }
 		}
+
+        if (this.remainingCards == 0 && State == GameState.Game)
+        {
+            // Victory ! Tap for new game
+            State = GameState.Win;
+        }
 	}
+
+    public void Reset()
+    {
+        foreach (var card in Cards)
+        {
+            Destroy(card);
+        }  
+    }
 
     public void NotifyCardShowing(Card card)
     {
@@ -121,6 +219,8 @@ public class Game : MonoBehaviour
         {
             if (ShowingCards[0].Picture.sprite == ShowingCards[1].Picture.sprite)
             {
+                this.remainingCards -= 2;
+
                 // spawn stars
                 GameObject stars = Instantiate(StarParticulePrefab) as GameObject;
                 stars.transform.position = ShowingCards[0].transform.position;
@@ -131,7 +231,7 @@ public class Game : MonoBehaviour
             }
             else
             {
-                m_Delay = m_ShowBeforeHide;
+                this.delay = m_ShowBeforeHide;
             }
         }
     }

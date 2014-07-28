@@ -3,22 +3,42 @@ using System.Collections;
 
 public class VictoryScript : MonoBehaviour
 {
-    public GUIStyle DuCul;
+    public GUIStyle Style;
+
+    public float Scale = 2.0f;
+
+    public bool Display;
+    private Game Game;
 
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+	{
+	   // Style.fontSize = (int)(Style.fontSize * Scale);
+	    Game = FindObjectOfType<Game>();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-	
+	void Update () 
+    {
+	    if (Display && Input.GetMouseButton(0))
+	    {
+            Game.Reset();
+            Application.LoadLevel("MainMenu"); 
+	    }
+
+        if (Game.State == Game.GameState.Win)
+        {
+            Display = true;
+        }
 	}
 
     void OnGUI()
     {
-        const float labelWidth = 200;
-        const float labelHeight = 70;
-        GUI.Label(new Rect(Screen.width / 2f - labelWidth / 2f, Screen.height / 2f - labelHeight / 2f, labelWidth, labelHeight), "de mes fesses", this.DuCul);
+        if (Display)
+        {
+            const float labelWidth = 200;
+            const float labelHeight = 70;
+            GUI.Label(new Rect(Screen.width / 2f - labelWidth / 2f, Screen.height / 2f - labelHeight / 2f, labelWidth, labelHeight), "Victoire!", this.Style);            
+        }
     }
 }

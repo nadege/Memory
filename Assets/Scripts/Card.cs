@@ -42,7 +42,6 @@ public class Card : MonoBehaviour
 
         if (m_IsAnimating)
         {
-
             m_IsAnimating = UpdateAnimation();
         }
     }
