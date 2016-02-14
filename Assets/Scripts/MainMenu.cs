@@ -23,9 +23,9 @@ public class MainMenu : MonoBehaviour
         const float labelWidth = 200;
         const float labelHeight = 70;
 
-        GUI.Label(new Rect(Screen.width/2f - 200f, 70f, 400f, 140f), "Memory !", this.TitleStyle);
-
-        if (GUI.Button(new Rect(Screen.width / 2f - labelWidth / 2f, Screen.height / 2f - labelHeight - labelHeight / 2f, labelWidth, labelHeight),
+        GUI.Label(new Rect(Screen.width/2f - 200f, 50f, 400f, 140f), "Memory !", this.TitleStyle);
+        
+        if (GUI.Button(new Rect(Screen.width / 2f - labelWidth / 2f, Screen.height / 2f - (labelHeight * 2.5f) / 2f, labelWidth, labelHeight),
                 "Easy", this.MainButtonsStyle))
         {
             Game.PairCount = 3;
@@ -41,7 +41,7 @@ public class MainMenu : MonoBehaviour
             Application.LoadLevel("Game");
         }
 
-        if (GUI.Button(new Rect(Screen.width / 2f - labelWidth / 2f, Screen.height / 2f + labelHeight + labelHeight / 2f, labelWidth, labelHeight),
+        if (GUI.Button(new Rect(Screen.width / 2f - labelWidth / 2f, Screen.height / 2f + (labelHeight * 2.5f) / 2f, labelWidth, labelHeight),
                 "Hard", this.MainButtonsStyle))
         {
             Game.PairCount = 10;
@@ -49,7 +49,7 @@ public class MainMenu : MonoBehaviour
             Application.LoadLevel("Game");
         }
 
-        GUI.Label(new Rect(Screen.width / 2f - 230f / 2f, Screen.height - 100f, 230f, 70f), "Made by Nadège Michel 1weekend-studio.net Icons from game-icons.net", this.CreditStyle);
+        GUI.Label(new Rect(Screen.width / 2f - 230f / 2f, Screen.height - 100f, 230f, 70f), "Made by Nadège Michel - nashella.itch.io - Icons from game-icons.net", this.CreditStyle);
 
     }
 }

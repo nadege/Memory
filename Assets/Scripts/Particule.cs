@@ -10,7 +10,7 @@ public class Particule : MonoBehaviour
     {
         // Set the sorting layer of the particle system.
         //particleSystem.renderer.sortingLayerName = "foreground";
-        particleSystem.renderer.sortingOrder = 2;
+        particleSystem.GetComponent<Renderer>().sortingOrder = 2;
     }
 
     void Update()

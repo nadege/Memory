@@ -22,13 +22,17 @@ public class VictoryScript : MonoBehaviour
     {
 	    if (Display && Input.GetMouseButton(0))
 	    {
-            Game.Reset();
+            Destroy(Game.gameObject);
             Application.LoadLevel("MainMenu"); 
 	    }
 
         if (Game.State == Game.GameState.Win)
         {
             Display = true;
+        }
+        else
+        {
+            Display = false;  
         }
 	}
 

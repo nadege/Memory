@@ -79,7 +79,7 @@ public class Game : MonoBehaviour
         Object.DontDestroyOnLoad(this.gameObject);
     }
 
-    void StartGame () 
+    void StartGame ()
     {
         switch (Difficulty)
         {
